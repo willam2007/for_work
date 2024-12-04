@@ -1,3 +1,18 @@
+DN: OU=Отдел развития банковских технологий,OU=Основной офис,OU=Владивосток,OU=PSKB,DC=pskb,DC=ad
+dn: ["OU=Отдел развития банковских технологий,OU=Основной офис,OU=Владивосток,OU=PSKB,DC=pskb,DC=ad"]
+objectclass: ["top", "organizationalUnit"]
+ou: ["Отдел развития банковских технологий"]
+physicaldeliveryofficename: ["001-00-67"]
+distinguishedname: ["OU=Отдел развития банковских технологий,OU=Основной офис,OU=Владивосток,OU=PSKB,DC=pskb,DC=ad"]
+instancetype: ["4"]
+whencreated: ["20220505050311.0Z"]
+whenchanged: ["20220505051224.0Z"]
+usncreated: ["86630857"]
+usnchanged: ["86632356"]
+name: ["Отдел развития банковских технологий"]
+objectguid: ["\xA8F\x81i\x0F\x93\xC8B\xBF\xD5\x80\xD6\xCF\xC2Q\xDC"]
+objectcategory: ["CN=Organizational-Unit,CN=Schema,CN=Configuration,DC=pskb,DC=ad"]
+dscorepropagationdata: ["20240820071728.0Z", "20240820041136.0Z", "20240820014534.0Z", "20240820014403.0Z", "16010714223649.0Z"]
 # RM {29466} (https://redmine.pskb.ad/issues/29466)
   # Атрибуты AD у подразделения:
   # id - идентификатор
