@@ -1,3 +1,66 @@
+namespace :sprints do
+    desc 'Auto create global sprints'
+    task :auto_create_global_sprints => :environment do
+        desired_future_sprints = 3 # Количество будущих спринтов, которое должно быть всегда создано
+
+        Project.where(use_global_sprint: true).find_each do |project|
+            next if project.parent && project.parent.use_shared_sprint
+              admin_user = User.find_by(admin: true)
+              sprint_duration = 14 # Длительность спринта в днях
+              today = Date.today
+
+              future_sprints = Sprint.where(project_id: project)
+                                   .where('sprint_start_date >= ?', today.beginning_of_week)
+                                   .order(sprint_start_date: :asc)
+
+              while future_sprints.count < desired_future_sprints
+                  if future_sprints.any?
+                      last_sprint = future_sprints.last
+                      next_sprint_start_date = last_sprint.sprint_start_date + sprint_duration.days
+                  else
+                      next_sprint_start_date = today.beginning_of_week
+                  end
+
+                  sprint_start_date = next_sprint_start_date
+                  sprint_end_date = sprint_start_date + (sprint_duration - 1).days
+
+                  # Формируем название спринта
+                  year = sprint_start_date.strftime('%y')
+                  week_number = (sprint_start_date.strftime('%U').to_i / 2) + 1
+                  sprint_name = "#{year}#{format('%02d', week_number)}"
+
+                  # Определяем, является ли спринт общий
+                  is_shared = project.use_shared_sprint
+
+
+                  existing_sprint = Sprint.where(project_id: project,sprint_start_date: sprint_start_date).first
+                  if existing_sprint
+                    puts "Такой спринт #{sprint_name} уже существует"
+                  else
+
+                  begin
+                  # Создание спринта
+                    Sprint.create!(
+                        project_id: project.id,
+                        name: sprint_name,
+                        sprint_start_date: sprint_start_date,
+                        sprint_end_date: sprint_end_date,
+                        user_id: admin_user.id,
+                        shared: is_shared
+                    )
+                  puts "Создан спринт #{sprint_name} для проекта #{project.name} #{' (общий)' if is_shared}"
+                  end
+                  end
+                  future_sprints = Sprint.where(project_id: project)
+                                        .where('sprint_start_date >= ?', today.beginning_of_week)
+                                        .order(sprint_start_date: :asc)
+                end
+            end
+        end
+end
+
+
+
  def sync_departments
     begin
       # Инициализируем соединение с LDAP
