@@ -1,3 +1,76 @@
+<% if @issue.project != nil && @project != nil%>
+  <% if @project.track_sprint_history && @issue.sprint_id != nil %>
+  <p>
+    <label for="move_reason_select">Причина смены спринта</label>
+    <select id="move_reason_select" name="issue[move_reason_select]" onchange="toggleCustomReasonField(this)">
+    <%= options_for_select(["Работы по задаче не завершены", "Работы по задаче не начаты", "Недостаточная оценка объема работ по задаче","Выполнение более приоритетной задачи", "Временная неработоспособность исполнителя (отпуск, больничный, пропал доступ)","Технические проблемы с релизом/перенос релиза","Недостаточный анализ выполняемой задачи (проблемы/вопросы, возникающие в ходе выполнения)","Ожидание ответа Заказчика","Согласование ТЗ или иных документов","Релиз задачи отложен Заказчиком", "Иное"],selected: @issue.move_reason)%>  
+    </select>
+    <textarea id="issue_move_reason" name="issue[move_reason]" placeholder = "Укажите причину" style = "display: none;" %></textarea>
+  </p>
+  <%end%>
+<%end%>
+
+<%= javascript_tag do %>
+  function toggleCustomReasonField(selectElement) {
+    var textField = document.getElementById('issue_move_reason');
+    if (selectElement.value === 'Иное') {
+      textField.style.display = '';
+      textField.value = '';
+    } else {
+      textField.style.display = 'none';
+      textField.value = selectElement.value;
+    }
+  }
+  function toggleCustomReasonFieldReason(selectElement) {
+    var textField = document.getElementById('issue_reason_waiting');
+    if (selectElement.value === 'Иное') {
+      textField.style.display = '';
+      textField.value = '';
+    } else {
+      textField.style.display = 'none';
+      textField.value = selectElement.value;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    var selectElement = document.getElementById('issue_reason_waiting_select');
+    toggleCustomReasonFieldReason(selectElement)
+  });
+
+  document.addEventListener("DOMContentLoaded", function(){
+    var selectElement = document.getElementById('issue_move_reason_select');
+    toggleCustomReasonField(selectElement)
+  });
+
+$(document).ready(function(){
+  $("#issue_tracker_id, #issue_status_id").each(function(){
+    $(this).val($(this).find("option[selected=selected]").val());
+  });
+  $(".assign-to-me-link").click(function(event){
+    event.preventDefault();
+    var element = $(event.target);
+    $('#issue_assigned_to_id').val(element.data('id'));
+    element.hide();
+  });
+  $('#issue_assigned_to_id').change(function(event){
+    var assign_to_me_link = $(".assign-to-me-link");
+
+    if (assign_to_me_link.length > 0) {
+      var user_id = $(event.target).val();
+      var current_user_id = assign_to_me_link.data('id');
+
+      if (user_id == current_user_id) {
+        assign_to_me_link.hide();
+      } else {
+        assign_to_me_link.show();
+      }
+    }
+  });
+});
+
+
+
+
 -- ШАГ 1: Обновляем основную запись, ставим init_note = true
 WITH duplicates AS (
   SELECT
