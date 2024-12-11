@@ -1,3 +1,46 @@
+-- ШАГ 1: Обновляем основную запись, ставим init_note = true
+WITH duplicates AS (
+  SELECT
+    journalized_id,
+    journalized_type,
+    user_id,
+    notes,
+    created_on,
+    private_notes,
+    ARRAY_AGG(id ORDER BY init_note NULLS FIRST) AS ids
+  FROM journals
+  GROUP BY journalized_id, journalized_type, user_id, notes, created_on, private_notes
+  HAVING COUNT(*) > 2
+)
+UPDATE journals
+SET init_note = true
+WHERE id IN (
+  SELECT (ids[1])  -- первая запись в группе - основная
+  FROM duplicates
+);
+
+-- ШАГ 2: Удаляем дубликаты
+WITH duplicates AS (
+  SELECT
+    journalized_id,
+    journalized_type,
+    user_id,
+    notes,
+    created_on,
+    private_notes,
+    ARRAY_AGG(id ORDER BY init_note NULLS FIRST) AS ids
+  FROM journals
+  GROUP BY journalized_id, journalized_type, user_id, notes, created_on, private_notes
+  HAVING COUNT(*) > 2
+)
+DELETE FROM journals
+WHERE id IN (
+  SELECT unnest(ids[2:])  -- остальные записи, начиная со второй, это дубликаты
+  FROM duplicates
+);
+
+
+
 <div id="attributes" class="attributes">
   <%= render :partial => 'issues/attributes' %>
 </div>
