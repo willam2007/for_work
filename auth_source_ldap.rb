@@ -1,3 +1,19 @@
+<div id="attributes" class="attributes">
+  <%= render :partial => 'issues/attributes' %>
+</div>
+<!-- Поле причины ожидания -->
+<p>
+    <label>Причина ожидания</label>
+    <select id="reason_waiting_select" name="issue[reason_waiting_select]" onchange="toggleCustomReasonFieldReason(this)">
+    <%= options_for_select(["Ожидание ответа подрядчика", "Ожидание ответа заказчика", "Ожидание доработки в смежной системе/связанной задаче","Ожидает приобритения лицензии/оборудования", "Иное"],selected: @issue.reason_waiting)%>  
+    </select>
+    <textarea id="issue_reason_waiting" name="issue[reason_waiting]" placeholder = "Укажите причину" style = "display: none;" %></textarea>
+</p>
+
+
+
+
+
 namespace :sprints do
     desc 'Auto create global sprints'
     task :auto_create_global_sprints => :environment do
