@@ -79,6 +79,88 @@ namespace :sprints do
 end
 
 
+
+namespace :sprints do
+    desc 'Auto create global sprints'
+    task :auto_create_global_sprints => :environment do
+        desired_future_sprints = 3 # Количество будущих спринтов, которое должно быть всегда создано
+
+        Project.where(use_global_sprint: true).find_each do |project|
+            next if project.parent && project.parent.use_shared_sprint
+              admin_user = User.find_by(admin: true)
+              sprint_duration = 14 # Длительность спринта в днях
+              today = Date.today
+
+              future_sprints = Sprint.where(project_id: project)
+                                   .where('sprint_start_date >= ?', today.beginning_of_week)
+                                   .order(sprint_start_date: :asc)
+
+              while future_sprints.count < desired_future_sprints
+                  if future_sprints.any?
+                      last_sprint = future_sprints.last
+                      next_sprint_start_date = last_sprint.sprint_start_date + sprint_duration.days
+                  else
+                      next_sprint_start_date = today.beginning_of_week
+                  end
+
+                  sprint_start_date = next_sprint_start_date
+                  sprint_end_date = sprint_start_date + (sprint_duration - 1).days
+
+                  # Формируем название спринта
+                  year = sprint_start_date.strftime('%y')
+                  week_number = (sprint_start_date.strftime('%U').to_i / 2) + 1
+                  sprint_name = "#{year}#{format('%02d', week_number)}"
+
+                  # Определяем, является ли спринт общий
+                  is_shared = project.use_shared_sprint
+
+
+                  existing_sprint = Sprint.where(project_id: project, name: sprint_name).first
+                  if existing_sprint
+                    puts "Такой спринт #{sprint_name} #{project} уже существует"
+                    next_sprint_start_date += sprint_duration.days
+                    sprint_start_date = next_sprint_start_date
+                    sprint_end_date = sprint_start_date + (sprint_duration - 1).days
+
+                    year = sprint_start_date.strftime('%y')
+                    week_number = (sprint_start_date.strftime('%U').to_i / 2) + 1
+                    sprint_name = "#{year}#{format('%02d', week_number)}"
+
+                    attempt_counter ||= 0
+                    attempt_counter += 1
+                    if attempt_counter > 4
+                        break
+                    end
+                    existing_sprint = Sprint.where(project_id: project, name: sprint_name).first
+                    if existing_sprint
+                        puts "#{sprint_name}"
+                        next
+                    end
+                end
+                begin
+                    # Создание спринта
+                    Sprint.create!(
+                        project_id: project.id,
+                        name: sprint_name,
+                        sprint_start_date: sprint_start_date,
+                        sprint_end_date: sprint_end_date,
+                        user_id: admin_user.id,
+                        shared: is_shared
+                    )
+                  puts "Создан спринт #{sprint_name} для проекта #{project.name} #{' (общий)' if is_shared}"
+                rescue => e
+                    puts "Ошибка при создании спринта: #{e.message}"
+                    break
+                end
+                  future_sprints = Sprint.where(project_id: project)
+                                        .where('sprint_start_date >= ?', today.beginning_of_week)
+                                        .order(sprint_start_date: :asc)
+                end
+            end
+        end
+end
+
+
 <% if @issue.project != nil && @project != nil%>
   <% if @project.track_sprint_history && @issue.sprint_id != nil %>
   <p>
