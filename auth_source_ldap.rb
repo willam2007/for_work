@@ -1,3 +1,33 @@
+module TaskManager
+  module TrackerPath
+      extend ActiveSupport::Concern
+          included do
+              unloadable
+
+              # __________ТРЕКЕРЫ__________
+              INITIATIVE_TRACKER_ID = 30 # - инициатива
+              REQUIREMENT_TRACKER_ID = 31 # - требования
+              ANALYSIS_TRACKER_ID = 26
+
+              def is_requirement?
+                  self.id == REQUIREMENT_TRACKER_ID
+              end
+
+              def is_analysis?
+                self.id == ANALYSIS_TRACKER_ID
+              end
+
+
+
+              def is_initiative?
+                  self.id ==  INITIATIVE_TRACKER_ID
+              end
+
+
+      end
+  end
+end
+
 require_dependency 'issue'
 
 module TaskManager
