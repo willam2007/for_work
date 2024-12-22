@@ -1,4 +1,33 @@
 require_dependency 'issue'
+
+module TaskManager
+  module IssuePath
+    def self.included(base)
+      base.class_eval do
+        before_save :check_child_analysis_status
+
+        def check_child_analysis_status
+          if tracker && status_id == INWORK_STATUS_ID && parent.present? && parent.tracker_id == INITIATIVE_TRACKER_ID
+            parent.status_id = ANALYSIS_STATUS_ID
+            # здесь нужно вставить аналитика с Анализа на Родительскую задачу
+            parent.assigned_to = self.assigned_to if self.assigned_to
+            parent.save!
+          end
+        end
+
+
+
+
+
+
+      end
+    end
+  end
+end
+
+
+
+require_dependency 'issue'
 module TaskManager
   module IssueStatusPath
       extend ActiveSupport::Concern
