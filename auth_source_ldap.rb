@@ -1,3 +1,48 @@
+require_dependency 'issue'
+module TaskManager
+  module IssueStatusPath
+      extend ActiveSupport::Concern
+          included do
+              unloadable
+
+              INWORK_STATUS_ID == 59 # Статус в работе
+              ANALYSIS_STATUS_ID == 84 # Статус анализ
+
+
+
+
+
+      end
+  end
+end
+
+
+
+require 'redmine'
+
+Issue.send(:include, TaskManager::IssuePath)
+Tracker.send(:include, TaskManager::TrackerPath)
+IssueStatus.send(:include, TaskManager::IssueStatusPath)
+
+Redmine::Plugin.register :task_manager do
+  name 'Task Manager plugin'
+  author 'Volchkov Nikolay'
+  description 'This is a plugin for Redmine'
+  version '0.0.1'
+  url 'http://example.com/path/to/plugin'
+  author_url 'http://example.com/about'
+
+
+require_dependency 'issue'
+require_relative 'lib/task_manager/issue_path'
+
+# Засовываю в общий список модулей(для вкл\выкл в настройках проекта)
+  project_module :task_manager do
+    permission :use_task_manager, {}
+  end
+end
+
+
 Статусы.
 Механика:
 1)	После согласования инициативы, она должна перейти в статус Новая
