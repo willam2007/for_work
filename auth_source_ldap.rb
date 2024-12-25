@@ -1,3 +1,29 @@
+   # 8) Если инициатива находится в Разработке, а после переходит в статус Бэклог, то подзадачи с трекерами
+        #    UserStory и Технологический долг переходят в статус Новая.
+        def if_ininitiative_dev_sonissue
+          return unless tracker_id == TaskManager::Constants::INITIATIVE_TRACKER_ID
+
+
+          old_status = status_was
+          old_status_id = old_status&.id
+          Rails.logger.info "ID STATUS WAS #{old_status_id} !!!!!!!!"
+          new_status_id = status_id
+          Rails.logger.info "присваиваем #{old_status_id} к переменной"
+          if old_status_id == TaskManager::Constants::DEV_STATUS_ID &&
+            new_status_id == TaskManager::Constants::BACKLOG_STATUS_ID
+            Rails.logger.info "старый статус оказался  #{old_status_id}, а новый #{new_status_id}, начинаем смотреть подзадачи"
+            children.select do |child|
+              child.tracker_id == TaskManager::Constants::TEHNOLOGICAL_TRACKER_ID &&
+              child.tracker_id == TaskManager::Constants::USERSTORY_TRACKER_ID
+            end.each do |child|
+              child.status_id = TaskManager::Constants::NEW_STATUS_ID
+              child.save!
+            end
+          else
+            Rails.logger.error "старый статус равен разработке, а новый не равен БЭКЛОГ"
+          end
+        end
+
 module TaskManager
   module TrackerPath
       extend ActiveSupport::Concern
