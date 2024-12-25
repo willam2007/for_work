@@ -1,3 +1,31 @@
+module TaskManager
+  module Constants
+    # Трекеры
+
+    INITIATIVE_TRACKER_ID =   30 # - инициатива
+    REQUIREMENT_TRACKER_ID =  31 # - требования
+    ANALYSIS_TRACKER_ID =     26 # - Анализ
+    USERSTORY_TRACKER_ID =    55 # - UserStory
+    TEHNOLOGICAL_TRACKER_ID = 56 # - Технологический долг
+
+
+    # Статусы
+    DONE_STATUS_ID =       74 # - выполнена
+    INWORK_STATUS_ID =     59 # - в работе
+    ANALYSIS_STATUS_ID =   84 # - анализ
+    NEW_STATUS_ID =        46 # - новая
+    INWAIT_STATUS_ID =     77 # - в ожидании
+    ACCEPTANCE_STATUS_ID = 87 # - приемка
+    BACKLOG_STATUS_ID =    85 # - бэклогra
+    DEV_STATUS_ID =        86 # - разработка
+    CLOSED_STATUS_ID =     75 # - закрыта
+
+  end
+end
+
+
+
+
    # 8) Если инициатива находится в Разработке, а после переходит в статус Бэклог, то подзадачи с трекерами
         #    UserStory и Технологический долг переходят в статус Новая.
         def if_ininitiative_dev_sonissue
