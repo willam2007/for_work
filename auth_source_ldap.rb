@@ -1,3 +1,114 @@
+<%= form_tag url_for(controller: 'settings', action: 'plugin', id: :task_manager), method: :post do %>
+  <fieldset class="box">
+    <legend><%= l(:label_task_manager_settings) %></legend>
+    <div class="splitcontent">
+    <div class="splitcontentleft">
+      <!-- В ожидании -->
+    <p>
+        <label for="plugin_status_inwait"><%= l(:label_inwait_status) %> </label>
+        <%= select_tag 'settings[status_inwait]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_inwait']
+        ) %>
+    </p>
+        <!-- Разработка -->
+    <p>
+        <label for="plugin_status_dev"><%= l(:label_dev_status) %> </label>
+        <%= select_tag 'settings[status_dev]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_dev']
+        ) %>
+
+    </p>
+       <!-- Анализ -->
+    <p>
+        <label for="plugin_status_analysis"><%= l(:label_analysis_status) %> </label>
+        <%= select_tag 'settings[status_analysis]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_analysis']
+        ) %>
+    </p>
+      <!-- Новая -->
+    <p>
+        <label for="plugin_status_new"><%= l(:label_new_status) %> </label>
+        <%= select_tag 'settings[status_new]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_new']
+        ) %>
+    </p>
+      <!-- Закрыта -->
+    <p>
+        <label for="plugin_status_closed"><%= l(:label_closed_status) %> </label>
+        <%= select_tag 'settings[status_closed]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_closed']
+        ) %>
+    </p>
+    </div>
+    <div class="splitcontentright">
+
+      <!-- На согласовании --> 
+    <p>
+        <label for="plugin_status_approval"><%= l(:label_approval_status) %> </label>
+        <%= select_tag 'settings[status_approval]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_approval']
+        ) %>
+    </p>
+    
+      
+      <!-- Бэклог -->
+    <p>
+        <label for="plugin_status_backlog"><%= l(:label_backlog_status) %> </label>
+        <%= select_tag 'settings[status_backlog]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_backlog']
+        ) %>
+    </p>
+      <!-- В работе -->
+    <p>
+        <label for="plugin_status_inwork"><%= l(:label_inwork_status) %> </label>
+        <%= select_tag 'settings[status_inwork]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_inwork']
+        ) %>
+    </p>
+      <!-- Приемка -->
+     <p>
+        <label for="plugin_status_acceptance"><%= l(:label_acceptance_status) %> </label>
+        <%= select_tag 'settings[status_acceptance]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_acceptance']
+        ) %>
+    </p>
+      <!-- Выполнена -->
+     <p>
+        <label for="plugin_status_done"><%= l(:label_done_status) %> </label>
+        <%= select_tag 'settings[status_done]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_done']
+        ) %>
+    </p>
+    </div>
+    </div>
+
+    </fieldset>
+    <%= submit_tag l(:button_save) %>
+    <% end %>
+
+
+
+
 module TaskManager
   module Constants
     # Трекеры
