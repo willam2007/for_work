@@ -1,3 +1,56 @@
+require 'redmine'
+
+require_dependency File.dirname(__FILE__) +  '/lib/task_manager/constants'
+
+Issue.send(:include, TaskManager::IssuePath)
+Tracker.send(:include, TaskManager::TrackerPath)
+IssueStatus.send(:include, TaskManager::IssueStatusPath)
+Project.send(:include, TaskManager::ProjectPatch)
+
+Redmine::Plugin.register :task_manager do
+  name 'Task Manager plugin'
+  author 'Volchkov Nikolay'
+  description 'This is a plugin for Redmine'
+  version '0.0.1'
+  url 'http://example.com/path/to/plugin'
+  author_url 'http://example.com/about'
+
+  settings partial: 'settings/task_manager_settings',
+           default: {
+            'status_dev' => nil,
+            'status_backlog' => nil
+           }
+
+
+
+# Засовываю в общий список модулей(для вкл\выкл в настройках проекта)
+  project_module :task_manager do
+    permission :use_task_manager, {}
+  end
+end
+
+module TaskManager
+  module ProjectPatch
+    def self.included(base)
+        base.class_eval do
+
+          def task_manager?
+              is_task_manager = module_enabled?(:task_manager)
+              is_task_manager = parent.task_manager? unless is_task_manager or parent.nil?
+              return is_task_manager
+          end
+
+          def self.projects_with_task_manager
+            Project.joins(:enabled_modules).where(enabled_modules: { name: 'task_manager' })
+          end
+
+
+
+        end
+    end
+  end
+end
+
 <%= form_tag url_for(controller: 'settings', action: 'plugin', id: :task_manager), method: :post do %>
   <fieldset class="box">
     <legend><%= l(:label_task_manager_settings) %></legend>
