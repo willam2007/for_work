@@ -1,3 +1,206 @@
+<%= form_tag url_for(controller: 'settings', action: 'plugin', id: :task_manager), method: :post do %>
+  <fieldset class="box">
+    <h3><%= l(:label_task_manager_status) %></h3>
+    <div class="splitcontent">
+    <div class="splitcontentleft">
+      <!-- В ожидании -->
+    <p>
+        <label for="plugin_status_inwait"><%= l(:label_inwait_status) %> </label>
+        <%= select_tag 'settings[status_inwait]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_inwait']
+        ),
+        include_blank: true %>
+    </p>
+        <!-- Разработка -->
+    <p>
+        <label for="plugin_status_dev"><%= l(:label_dev_status) %> </label>
+        <%= select_tag 'settings[status_dev]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_dev']
+        ),
+        include_blank: true %>
+
+    </p>
+       <!-- Анализ -->
+    <p>
+        <label for="plugin_status_analysis"><%= l(:label_analysis_status) %> </label>
+        <%= select_tag 'settings[status_analysis]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_analysis']
+        ),
+        include_blank: true %>
+    </p>
+      <!-- Новая -->
+    <p>
+        <label for="plugin_status_new"><%= l(:label_new_status) %> </label>
+        <%= select_tag 'settings[status_new]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_new']
+        ),
+        include_blank: true %>
+    </p>
+      <!-- Закрыта -->
+    <p>
+        <label for="plugin_status_closed"><%= l(:label_closed_status) %> </label>
+        <%= select_tag 'settings[status_closed]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_closed']
+        ),
+        include_blank: true %>
+    </p>
+    </div>
+    <div class="splitcontentright">
+
+      <!-- На согласовании --> 
+    <p>
+        <label for="plugin_status_approval"><%= l(:label_approval_status) %> </label>
+        <%= select_tag 'settings[status_approval]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_approval']
+        ),
+        include_blank: true %>
+    </p>
+    
+      
+      <!-- Бэклог -->
+    <p>
+        <label for="plugin_status_backlog"><%= l(:label_backlog_status) %> </label>
+        <%= select_tag 'settings[status_backlog]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_backlog']
+        ),
+        include_blank: true %>
+    </p>
+      <!-- В работе -->
+    <p>
+        <label for="plugin_status_inwork"><%= l(:label_inwork_status) %> </label>
+        <%= select_tag 'settings[status_inwork]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_inwork']
+        ),
+        include_blank: true %>
+    </p>
+      <!-- Приемка -->
+     <p>
+        <label for="plugin_status_acceptance"><%= l(:label_acceptance_status) %> </label>
+        <%= select_tag 'settings[status_acceptance]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_acceptance']
+        ),
+        include_blank: true %>
+    </p>
+      <!-- Выполнена -->
+     <p>
+        <label for="plugin_status_done"><%= l(:label_done_status) %> </label>
+        <%= select_tag 'settings[status_done]',
+        options_for_select(
+            IssueStatus.all.map { |s| [s.name, s.id] },
+            Setting.plugin_task_manager['status_done']
+        ),
+        include_blank: true %>
+    </p>
+    </div>
+    </div>
+
+    </fieldset>
+    <%= submit_tag l(:button_save) %>
+
+    <fieldset class="box">
+    <h3><%= l(:label_task_manager_tracker) %></h3>
+
+    <div class="splitcontent">
+    <div class="splitcontentleft">
+    <!-- Инициатива -->    
+    <p>
+        <label for="plugin_tracker_initiative"><%= l(:label_initiative_tracker) %> </label>
+        <%= select_tag 'settings[tracker_initiative]',
+        options_for_select(
+            Tracker.all.map { |t| [t.name, t.id] },
+            Setting.plugin_task_manager['tracker_initiative']
+        ),
+        include_blank: true %>
+    </p>
+    <!-- Технологический долг --> 
+    <p>
+        <label for="plugin_tracker_tehnological"><%= l(:label_tehnological_tracker) %> </label>
+        <%= select_tag 'settings[tracker_tehnological]',
+        options_for_select(
+            Tracker.all.map { |t| [t.name, t.id] },
+            Setting.plugin_task_manager['tracker_tehnological']
+        ),
+        include_blank: true %>
+    </p>
+
+    </div>
+    
+    <div class="splitcontentright">
+    <!-- UserStory -->    
+    <p>
+        <label for="plugin_tracker_userstory"><%= l(:label_userstory_tracker) %> </label>
+        <%= select_tag 'settings[tracker_userstory]',
+        options_for_select(
+            Tracker.all.map { |t| [t.name, t.id] },
+            Setting.plugin_task_manager['tracker_userstory']
+        ),
+        include_blank: true %>
+    </p>
+    <!-- Анализ -->
+    <p>
+        <label for="plugin_tracker_analysis"><%= l(:label_analysis_tracker) %> </label>
+        <%= select_tag 'settings[tracker_analysis]',
+        options_for_select(
+            Tracker.all.map { |t| [t.name, t.id] },
+            Setting.plugin_task_manager['tracker_analysis']
+        ),
+        include_blank: true %>
+    </p>
+
+
+    </div>
+    </div>
+    </fieldset>
+
+    <%= submit_tag l(:button_save) %>
+    
+    <fieldset class="box">
+       <h3><%= l(:label_task_manager_enabled_projects) %></h3>
+        <ul>
+            <% Project.projects_with_task_manager.each do |project| %>
+            <li>
+                <%= link_to project.name, project_path(project) %>
+            </li>
+            <% end %>
+        </ul>
+    </fieldset>
+
+    <fieldset class="box">
+        <h3><%= l(:label_task_trackers) %></h3>
+        <p>
+            <%= select_tag 'settings[task_trackers][]',
+            options_for_select(Tracker.all.map { |t| [t.name, t.id] }, Setting.plugin_task_manager['task_manager']),
+            multiple: true, size: 10 %>
+        </p>
+
+        <h3><%= l(:label_subtask_trackers) %></h3>
+        <p>
+            <%= select_tag 'settings[subtask_trackers][]',
+            options_for_select(Tracker.all.map { |t| [t.name, t.id] }, Setting.plugin_task_manager['subtask_manager']),
+            multiple: true, size: 10 %>
+        </p>
+        <%= submit_tag l(:button_save) %>
+    </fieldset>
+    <% end %>
+
 require 'redmine'
 
 require_dependency File.dirname(__FILE__) +  '/lib/task_manager/constants'
