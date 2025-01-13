@@ -1,4 +1,70 @@
 <fieldset class="box">
+  <legend><%= l(:label_goal_settings) %></legend>
+  <div class="splitcontent">
+    <div class="splitcontentleft">
+      <!-- Цель -->
+      <p>
+        <label for="plugin_goal_tracker">
+          <%= l(:label_goal_tracker) %>
+          (<%= Setting.plugin_task_manager['goal_tracker_related_trackers']&.map do |tracker_id|
+                Tracker.find_by(id: tracker_id)&.name
+              end.compact.join(', ') %>)
+        </label>
+        <%= select_tag 'settings[goal_tracker]',
+                       options_for_select(
+                         Tracker.all.map { |t| [t.name, t.id] },
+                         Setting.plugin_task_manager['goal_tracker']
+                       ) %>
+      </p>
+    </div>
+    <div class="splitcontentright">
+      <!-- Трекеры, которые могут связываться с целью -->
+      <p>
+        <label for="plugin_goal_tracker_related_trackers"><%= l(:label_goal_tracker_related_trackers) %></label>
+        <%= select_tag 'settings[goal_tracker_related_trackers][]',
+                       options_for_select(
+                         Tracker.all.map { |t| [t.name, t.id] },
+                         Setting.plugin_task_manager['goal_tracker_related_trackers']
+                       ),
+                       multiple: true, size: 10 %>
+      </p>
+    </div>
+  </div>
+</fieldset>
+
+
+
+module TaskManager
+  module IssuePatch
+    def self.included(base)
+      base.class_eval do
+        validate :validate_allowed_related_trackers, if: :goal_tracker?
+
+        private
+
+        # Проверка, что трекер связан только с разрешёнными трекерами
+        def validate_allowed_related_trackers
+          allowed_trackers = Setting.plugin_task_manager['goal_related_trackers'] || []
+          allowed_tracker_ids = allowed_trackers.map(&:to_i)
+
+          relations.each do |relation|
+            related_tracker = relation.issue_to.tracker_id
+            unless allowed_tracker_ids.include?(related_tracker)
+              errors.add(:base, l(:error_invalid_relation_tracker, tracker: relation.issue_to.tracker.name))
+            end
+          end
+        end
+
+        # Проверка, является ли трекер текущей задачи "Цель"
+        def goal_tracker?
+          tracker_id.to_i == Setting.plugin_task_manager['goal_tracker'].to_i
+        end
+      end
+    end
+  end
+end
+
+<fieldset class="box">
   <legend><%= l(:label_goal_related_trackers) %></legend>
   <p>
     <%= select_tag 'settings[goal_related_trackers][]',
