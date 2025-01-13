@@ -1,3 +1,15 @@
+<fieldset class="box">
+  <legend><%= l(:label_goal_related_trackers) %></legend>
+  <p>
+    <%= select_tag 'settings[goal_related_trackers][]',
+                   options_for_select(
+                     Tracker.all.map { |t| [t.name, t.id] },
+                     Setting.plugin_task_manager['goal_related_trackers']
+                   ),
+                   multiple: true, size: 10 %>
+  </p>
+</fieldset>
+
 Проверка ограничения подзадач для трекера 64
 I, [2025-01-13T11:35:21.828508 #6940]  INFO -- : [e74e0188-9879-4564-8442-df99dede1ee5] Список запрещенных трекеров: ["59", "60", "61", "62", "58"]
 I, [2025-01-13T11:35:21.828539 #6940]  INFO -- : [e74e0188-9879-4564-8442-df99dede1ee5] Трекер родительской задачи: 58
