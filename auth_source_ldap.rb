@@ -1,3 +1,20 @@
+def subtasks_not_allowed
+          Rails.logger.info "Проверка ограничения подзадач для трекера #{tracker_id}"
+
+          restricted_trackers = Setting.plugin_task_manager['subtask_trackers'] || []
+          Rails.logger.info "Список запрещенных трекеров: #{ restricted_trackers.inspect}"
+
+          if parent.present?
+            parent_tracker_id = parent.tracker_id
+            Rails.logger.info "Трекер родительской задачи: #{parent_tracker_id}"
+            if restricted_trackers.map(&:to_i).include?
+              Rails.logger.warn "Подзадачи запрещены для трекера #{parent_tracker_id}"
+              errors.add(:base, l(:error_subtasks_not_allowed))
+            end
+          else Rails.logger.warn "#{parent_id} - у нашей задачи нет родителя, поэтому не идем дальше"
+          end
+        end
+
 <%= form_tag url_for(controller: 'settings', action: 'plugin', id: :task_manager), method: :post do %>
   <fieldset class="box">
     <h3><%= l(:label_task_manager_status) %></h3>
