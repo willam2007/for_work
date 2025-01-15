@@ -1,3 +1,162 @@
+require_dependency 'issue'
+
+module TaskManager
+  module IssuePath
+    def self.included(base)
+      base.class_eval do
+        before_save :allowed_related_trackers, if: :goal_tracker?
+        before_save :subtasks_not_allowed # Подзадачи не имеют подзадачи
+        before_save :task_manager? # Здесь выполняется проверка включен ли плгаин в проекте.
+        before_save :check_child_analysis_status, if: :task_manager?                   # 3)
+        before_save :sync_child_analysis_when_initiative_to_new, if: :task_manager?    # 6)
+        after_save :if_ininitiative_dev_sonissue, if: :task_manager?                   # 8)
+        after_save :move_initiative_to_acceptance_if_children_done, if: :task_manager? # 4)
+        after_save :move_subtask_inwork, if: :task_manager?                            # 9)
+        # after_save :approved_into_new_status, if: :task_manager?                       # 1)
+        # after_save :not_approved_closed_status, if: :task_manager?                     # 2)
+
+        def task_manager?
+          project.task_manager?
+        end
+
+        # 3) Перенос с Анализа на Инициативу
+        def check_child_analysis_status
+          if tracker_id == TaskManager::Helpers.analysis_tracker_id &&
+              status_id == TaskManager::Helpers.inwork_status_id &&
+              parent.present? &&
+              parent.tracker_id == TaskManager::Helpers.initiative_tracker_id
+              parent.status_id = TaskManager::Helpers.analysis_status_id
+            # здесь нужно вставить аналитика с Анализа на Родительскую задачу
+            parent.assigned_to = self.assigned_to if self.assigned_to
+            parent.save!
+          end
+        end
+
+        # 6) Если инициатива Новая до все дети Анализ в работе тоже становятся новыми.
+        def sync_child_analysis_when_initiative_to_new
+          if tracker_id == TaskManager::Helpers.initiative_tracker_id &&
+            # saved_change_to_status_id? &&
+            status_id == TaskManager::Helpers.new_status_id
+
+            # Ищем дочерние задачи со статусом "В работе" и трекером "Анализ"
+            children.select do |child|
+              child.tracker_id == TaskManager::Helpers.analysis_tracker_id &&
+              child.status_id == TaskManager::Helpers.inwork_status_id
+            end.each do |child|
+              child.status_id = TaskManager::Helpers.new_status_id
+              child.save!
+            end
+          end
+        end
+
+        # 4) Если все подзадачи переведены в статус "Выполнено", то Инициатива переходит в Приемка.
+        def move_initiative_to_acceptance_if_children_done
+          return unless parent.present?
+          return unless parent.tracker_id == TaskManager::Helpers.initiative_tracker_id
+
+          all_children_done = parent.children.all? do |child|
+            child.status_id == TaskManager::Helpers.done_status_id
+          end
+          if all_children_done
+            parent.status_id = TaskManager::Helpers.acceptance_status_id
+            parent.save!
+          end
+        end
+
+        # 8) Если инициатива находится в Разработке, а после переходит в статус Бэклог, то подзадачи с трекерами
+        #    UserStory и Технологический долг переходят в статус Новая.
+        def if_ininitiative_dev_sonissue
+          return unless tracker_id == TaskManager::Helpers.initiative_tracker_id
+          old_status = status_was
+          old_status_id = old_status&.id
+          Rails.logger.info "ID STATUS WAS #{old_status_id} !!!!!!!!"
+          new_status_id = status_id
+          Rails.logger.info "присваиваем #{old_status_id} к переменной"
+          if old_status_id == TaskManager::Helpers.dev_status_id &&
+            new_status_id == TaskManager::Helpers.backlog_status_id
+            Rails.logger.info "старый статус оказался  #{old_status_id}, а новый #{new_status_id}, начинаем смотреть подзадачи"
+            children.select do |child|
+              [TaskManager::Helpers.tehnological_tracker_id, TaskManager::Helpers.userstory_tracker_id].include?(child.tracker_id)
+            end.each do |child|
+              child.status_id = TaskManager::Helpers.new_status_id
+              child.save!
+            end
+          else
+            Rails.logger.error "старый статус равен разработке, а новый не равен БЭКЛОГ"
+          end
+        end
+
+        # 9) Если трекер не Инициатива, и подзадача переводится в статус "В работе", то и сама задача переводиится В работе
+        def move_subtask_inwork
+          return unless parent.present?
+          return unless parent.tracker_id != TaskManager::Helpers.initiative_tracker_id
+          if status_id == TaskManager::Helpers.inwork_status_id
+            parent.status_id = TaskManager::Helpers.inwork_status_id
+            parent.save!
+          end
+        end
+
+
+        # 2) Если согласаована, то она должна перейти в статус Новая
+        def approved_into_new_status
+          return unless tracker_id == TaskManager::Helpers.initiative_tracker_id
+          if approved?
+            status_id = TaskManager::Helpers.new_status_id
+            issue.save!
+          end
+        end
+
+        # 3) Если не согласована, то должна закрыться
+        def not_approved_closed_status
+          return unless tracker_id == TaskManager::Helpers.initiative_tracker_id
+          if not_aproved?
+            status_id = TaskManager::Helpers.closed_status_id
+            issue.save!
+          end
+        end
+
+        def subtasks_not_allowed
+          Rails.logger.info "Проверка ограничения подзадач для трекера #{tracker_id}"
+
+          restricted_trackers = Setting.plugin_task_manager['subtask_trackers'] || []
+          Rails.logger.info "Список запрещенных трекеров: #{ restricted_trackers.inspect}"
+
+          if parent_id.present?
+            parent_tracker_id = parent.tracker_id
+            Rails.logger.info "Трекер родительской задачи: #{parent_tracker_id}"
+            if restricted_trackers.map(&:to_i).include?(parent_tracker_id)
+              Rails.logger.warn "Подзадачи запрещены для трекера #{parent_tracker_id}"
+              errors.add(:base, l(:error_subtasks_not_allowed))
+              throw :abort # пробую прекратить active record
+            end
+          else Rails.logger.warn "#{parent_id} - у нашей задачи нет родителя, поэтому не идем дальше"
+          end
+        end
+
+        def allowed_related_trackers
+          allowed_trackers = Setting.plugin_task_manager['goal_related_trackers'] || []
+          allowed_trackers_ids = allowed_trackers.map(&:to_i)
+
+          relations.each do |relation|
+            related_tracker = relation.issue_to.tracker_id
+            unless allowed_trackers_ids.include?(related_tracker)
+              errors.add(:base, l(:error_invalid_relation_tracker, tracker: relation.issue_to.tracker.name))
+            end
+          end
+        end
+
+        def goal_tracker?
+          tracker_id == Setting.plugin_task_manager['goal_tracker']
+        end
+
+
+
+      end
+    end
+  end
+end
+
+
 <fieldset class="box">
   <legend><%= l(:label_goal_settings) %></legend>
   <div class="splitcontent">
