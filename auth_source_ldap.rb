@@ -1,3 +1,23 @@
+level_1_trackers = (Setting.plugin_task_manager['tracker_level_1'] || []).map(&:to_i)
+          level_2_trackers = (Setting.plugin_task_manager['tracker_level_2'] || []).map(&:to_i)
+          level_3_trackers = (Setting.plugin_task_manager['tracker_level_3'] || []).map(&:to_i)
+          level_4_trackers = (Setting.plugin_task_manager['tracker_level_4'] || []).map(&:to_i)
+          level_234_trackers = level_2_trackers + level_3_trackers + level_4_trackers
+          level_34_trackers = level_3_trackers + level_4_trackers
+
+          parent_tracker_id = parent.tracker_id
+          current_tracker_id = tracker_id
+
+          if level_1_trackers.include?(parent_tracker_id) && level_234_trackers.include?(current_tracker_id)
+            return
+          elsif level_2_trackers.include?(parent_tracker_id) && level_3_trackers.include?(current_tracker_id)
+            return
+          else
+            errors.add(:base, l(:error_tracker_hierarchy, tracker: Tracker.find(tracker_id).name, parent_tracker: Tracker.find(parent.tracker_id).name))
+            throw :abort
+          end
+        end
+
 <fieldset class="box">
   <legend><%= l(:label_tracker_hierarchy) %></legend>
   <div class="splitcontent">
