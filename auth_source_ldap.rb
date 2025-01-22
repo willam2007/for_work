@@ -1,4 +1,7 @@
-level_1_trackers = (Setting.plugin_task_manager['tracker_level_1'] || []).map(&:to_i)
+def validate_tracker_hierarchy
+          return unless parent.present?
+
+          level_1_trackers = (Setting.plugin_task_manager['tracker_level_1'] || []).map(&:to_i)
           level_2_trackers = (Setting.plugin_task_manager['tracker_level_2'] || []).map(&:to_i)
           level_3_trackers = (Setting.plugin_task_manager['tracker_level_3'] || []).map(&:to_i)
           level_4_trackers = (Setting.plugin_task_manager['tracker_level_4'] || []).map(&:to_i)
@@ -17,7 +20,6 @@ level_1_trackers = (Setting.plugin_task_manager['tracker_level_1'] || []).map(&:
             throw :abort
           end
         end
-
 <fieldset class="box">
   <legend><%= l(:label_tracker_hierarchy) %></legend>
   <div class="splitcontent">
