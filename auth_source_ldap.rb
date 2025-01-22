@@ -2,6 +2,54 @@
   <legend><%= l(:label_tracker_hierarchy) %></legend>
   <div class="splitcontent">
     <div class="splitcontentleft">
+      <!-- Трекеры 1 уровня -->
+      <p>
+        <label for="plugin_tracker_level_1">
+          <%= l(:label_tracker_level_1) %>
+        </label>
+        <%= select_tag 'settings[tracker_level_1][]',
+                       options_for_select(
+                         Tracker.all.map { |t| [t.name, t.id] },
+                         (Setting.plugin_task_manager['tracker_level_1'] || []).map(&:to_i)
+                       ),
+                       multiple: true, size: 10 %>
+      </p>
+
+      <!-- Трекеры 2 уровня -->
+      <p>
+        <label for="plugin_tracker_level_2">
+          <%= l(:label_tracker_level_2) %>
+        </label>
+        <%= select_tag 'settings[tracker_level_2][]',
+                       options_for_select(
+                         Tracker.all.map { |t| [t.name, t.id] },
+                         (Setting.plugin_task_manager['tracker_level_2'] || []).map(&:to_i)
+                       ),
+                       multiple: true, size: 10 %>
+      </p>
+
+      <!-- Трекеры 3 уровня -->
+      <p>
+        <label for="plugin_tracker_level_3">
+          <%= l(:label_tracker_level_3) %>
+        </label>
+        <%= select_tag 'settings[tracker_level_3][]',
+                       options_for_select(
+                         Tracker.all.map { |t| [t.name, t.id] },
+                         (Setting.plugin_task_manager['tracker_level_3'] || []).map(&:to_i)
+                       ),
+                       multiple: true, size: 10 %>
+      </p>
+    </div>
+  </div>
+</fieldset>
+<%= submit_tag l(:button_save) %>
+
+
+<fieldset class="box">
+  <legend><%= l(:label_tracker_hierarchy) %></legend>
+  <div class="splitcontent">
+    <div class="splitcontentleft">
       <p>
         <label for="plugin_tracker_level_1"><%= l(:label_tracker_level_1) %></label>
         <%= select_tag 'settings[tracker_level_1][]',
