@@ -1,3 +1,65 @@
+<fieldset class="box">
+  <legend><%= l(:label_tracker_hierarchy) %></legend>
+  <div class="splitcontent">
+    <div class="splitcontentleft">
+      <p>
+        <label for="plugin_tracker_level_1"><%= l(:label_tracker_level_1) %></label>
+        <%= select_tag 'settings[tracker_level_1][]',
+                       options_for_select(
+                         Tracker.all.map { |t| [t.name, t.id] },
+                         Setting.plugin_task_manager['tracker_level_1']
+                       ),
+                       multiple: true, size: 10 %>
+      </p>
+      
+      <p>
+        <label for="plugin_tracker_level_2"><%= l(:label_tracker_level_2) %></label>
+        <%= select_tag 'settings[tracker_level_2][]',
+                       options_for_select(
+                         Tracker.all.map { |t| [t.name, t.id] },
+                         Setting.plugin_task_manager['tracker_level_2']
+                       ),
+                       multiple: true, size: 10 %>
+      </p>
+      
+      <p>
+        <label for="plugin_tracker_level_3"><%= l(:label_tracker_level_3) %></label>
+        <%= select_tag 'settings[tracker_level_3][]',
+                       options_for_select(
+                         Tracker.all.map { |t| [t.name, t.id] },
+                         Setting.plugin_task_manager['tracker_level_3']
+                       ),
+                       multiple: true, size: 10 %>
+      </p>
+    </div>
+  </div>
+</fieldset>
+
+
+ def validate_tracker_hierarchy
+          return unless parent.present?
+
+          level_1_trackers = (Setting.plugin_task_manager['tracker_level_1'] || []).map(&:to_i)
+          level_2_trackers = (Setting.plugin_task_manager['tracker_level_2'] || []).map(&:to_i)
+          level_3_trackers = (Setting.plugin_task_manager['tracker_level_3'] || []).map(&:to_i)
+
+          parent_tracker_id = parent.tracker_id
+          current_tracker_id = tracker_id
+
+          if level_1_trackers.include?(parent_tracker_id) && (level_2_trackers.include?(current_tracker_id) || level_3_trackers.include?(current_tracker_id))
+            return
+          elsif level_2_trackers.include?(parent_tracker_id) && level_3_trackers.include?(current_tracker_id)
+            return
+          else
+            errors.add(:base, l(:error_tracker_hierarchy, tracker: Tracker.find(tracker_id).name, parent_tracker: Tracker.find(parent.tracker_id).name))
+            throw :abort
+          end
+        end
+      end
+    end
+  end
+
+
 require_dependency 'issue'
 
 module TaskManager
